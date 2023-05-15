@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-import User from "@models/User";
+import User from "@models/user";
 import { connectToDB } from "@utils/database";
 
 // Every Next.js route is a serverless route
@@ -22,36 +22,40 @@ const handler = NextAuth({
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
 		}),
 	],
-	async session({ sesson }) {
-		const sessionUser = await User.findOne({ email: session.user.email });
-
-		sesson.user.id = sessonUser._id.toString();
-
-		return session;
-	},
-	async signIn({ profile }) {
-		try {
-			await connectToDB();
-
-			// Check if user exists
-			const userExists = await User.findOne({
-				email: profile.email,
+	callbacks: {
+		async session({ session }) {
+			const sessionUser = await User.findOne({
+				email: session.user.email,
 			});
 
-			// If not, create user and save to database
-			if (!userExists) {
-				await User.create({
-					email: profile.email,
-					username: profile.name.replace(" ", "").toLowerCase(),
-					image: profile.picture,
-				});
-			}
+			session.user.id = sessionUser._id.toString();
 
-			return true;
-		} catch (error) {
-			console.log(error);
-			return false;
-		}
+			return session;
+		},
+		async signIn({ profile }) {
+			try {
+				await connectToDB();
+
+				// Check if user exists
+				const userExists = await User.findOne({
+					email: profile.email,
+				});
+
+				// If not, create user and save to database
+				if (!userExists) {
+					await User.create({
+						email: profile.email,
+						username: profile.name.replace(" ", "").toLowerCase(),
+						image: profile.picture,
+					});
+				}
+
+				return true;
+			} catch (error) {
+				console.log(error);
+				return false;
+			}
+		},
 	},
 });
 
