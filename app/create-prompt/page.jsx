@@ -8,6 +8,9 @@ import Form from "@components/Form";
 import { set } from "mongoose";
 
 const CreatePrompt = () => {
+	const router = useRouter();
+	const { data: session } = useSession();
+
 	const [submitting, setSubmitting] = useState(false);
 	const [post, setPost] = useState({
 		prompt: "",
@@ -48,5 +51,10 @@ const CreatePrompt = () => {
 		/>
 	);
 };
+
+/* 
+Example Prompt:
+You are a professional web developer. I'm going to give you a snippet of code, and you can give me some advice on how to make it cleaner, more readable, and more efficient.
+*/
 
 export default CreatePrompt;
